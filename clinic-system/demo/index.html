@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clinic One – Appointments and Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f1;--surface:#fff;--ink:#12312e;--muted:#5b716e;--line:#d3e0dd;--teal:#0f6b66;--teal-ink:#fff;--soft:#dcebe8;--warn:#c4472f;--ok:#2d7a4b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1c1b;--surface:#172827;--ink:#e3efec;--muted:#93aaa6;--line:#2a4140;--teal:#4cc2b8;--teal-ink:#0a1a19;--soft:#1f3836;--warn:#ff8a73;--ok:#6fd39a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1c1b;--surface:#172827;--ink:#e3efec;--muted:#93aaa6;--line:#2a4140;--teal:#4cc2b8;--teal-ink:#0a1a19;--soft:#1f3836;--warn:#ff8a73;--ok:#6fd39a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,sans-serif}
+header{background:var(--teal);color:var(--teal-ink);padding:18px 20px 0}
+.wrap{max-width:980px;margin:0 auto}
+header h1{margin:0;font-size:1.5rem;letter-spacing:-.01em}
+header p{margin:2px 0 14px;opacity:.85;font-size:.95rem}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:transparent;color:inherit;border:0;padding:10px 14px;font:inherit;font-weight:500;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;opacity:.8}
+nav button[aria-current=true]{background:var(--bg);color:var(--ink);opacity:1}
+main{padding:22px 20px 60px}
+h2{font-size:1.3rem;margin:0 0 14px}h3{font-size:1.05rem;margin:0 0 8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.stat{background:var(--surface);border-left:5px solid var(--teal);padding:12px 16px;border-radius:6px}
+.stat b{display:block;font-size:1.9rem;line-height:1.1}.stat span{color:var(--muted);font-size:.9rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px}
+.row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.row:first-of-type{border-top:0}
+.time{font-weight:700;min-width:64px}
+.grow{flex:1;min-width:160px}.sub{color:var(--muted);font-size:.88rem}
+label{display:block;font-weight:500;font-size:.9rem;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 14px}
+button.b{background:var(--teal);color:var(--teal-ink);border:0;padding:10px 16px;border-radius:8px;font:inherit;font-weight:700;cursor:pointer}
+button.g{background:transparent;color:var(--ink);border:1px solid var(--line);padding:6px 10px;border-radius:8px;font:inherit;font-size:.85rem;cursor:pointer}
+button.g.d{color:var(--warn)}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.slots{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.slot{padding:8px 12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;cursor:pointer;font:inherit}
+.slot[aria-pressed=true]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+.slot:disabled{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:700;background:var(--soft)}
+.tag.Completed{color:var(--ok)}.tag.Cancelled{color:var(--warn)}
+.tabs2{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs2 button[aria-pressed=true]{background:var(--soft);font-weight:700}
+.msg{padding:10px 14px;border-radius:8px;background:var(--soft);margin-bottom:14px}
+.err{color:var(--warn)}
+.cols{display:grid;grid-template-columns:1fr 1.3fr;gap:18px}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--teal);padding:4px 12px;margin:10px 0}
+.sched{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sched span{padding:3px 10px;border-radius:6px;background:var(--soft);font-size:.85rem}
+.sched span.off{opacity:.4}
+.btn-theme{float:right;background:transparent;border:1px solid currentColor;color:inherit;border-radius:8px;padding:4px 10px;font:inherit;font-size:.85rem;cursor:pointer}
+@media(prefers-reduced-motion:no-preference){main>div{animation:in .25s ease-out}@keyframes in{from{opacity:0}to{opacity:1}}}
+.printonly{display:none;margin-bottom:10px}
+body.hasbg{background-size:cover;background-position:center;background-attachment:fixed}.bgprev{max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--line);margin-top:8px}
+.brand{display:flex;gap:14px;align-items:center;margin-bottom:6px}.brand img{height:64px;width:auto;background:#fff;border-radius:10px;padding:4px}.brand p{margin-bottom:6px}
+.duty{border-left:6px solid var(--ok)}.closed{border-left:6px solid var(--warn)}.tag.Pending{color:var(--warn)}.tag.Received{color:var(--ok)}.tag.Rejected{color:var(--warn)}
+@media print{header,#nav,.noprint,.cols>div:first-child,.rec label,.rec select,.rec textarea,.rec .b{display:none!important}.cols{display:block}body{background:#fff;color:#000}.panel{border:0}.printonly{display:block!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<button class="btn-theme" id="theme" aria-label="Switch light or dark theme">Theme</button>
+<button class="btn-theme" id="out" hidden style="margin-right:8px">Log out</button><span id="who" style="float:right;margin-right:12px;font-size:.9rem"></span>
+<div class="brand"><img src="data:image/jpeg;base64,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" alt="Bagong Pilipinas logo" width="76" height="64"><div><h1>Clinic One</h1>
+<p>Appointments, patient records and doctor schedules in one place</p></div></div>
+<nav id="nav" aria-label="Sections"></nav>
+</div></header>
+<main><div class="wrap" id="view"></div></main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.toISOString().slice(0,10);
+const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return iso(d)};
+const addDays=(n)=>{const d=new Date(today()+'T00:00');d.setDate(d.getDate()+n);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return iso(d)};
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const SLOTS=[];for(let h=9;h<17;h++){if(h===12)continue;SLOTS.push(h+':00'.replace(/^(\d):/,'0$1:'),(h+':30'))}
+const pad=t=>t.padStart(5,'0');
+const fmt=t=>{let[h,m]=t.split(':');h=+h;return(h>12?h-12:h)+':'+m+(h>=12?' PM':' AM')};
+const fdate=d=>new Date(d+'T00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+
+function seed(){return{
+ doctors:[{id:'d1',name:'Dr. Maria Santos',spec:'Family Medicine',days:[1,2,3,4,5]},{id:'d2',name:'Dr. Jose Reyes',spec:'Pediatrics',days:[1,3,5]},{id:'d3',name:'Dr. Ana Cruz',spec:'Internal Medicine',days:[2,4,6]}],
+ patients:[{id:'p1',name:'Liza Mendoza',age:34,phone:'0917 555 0101',notes:[{date:addDays(-20),did:'d1',text:'Seasonal flu. Advised rest and fluids. Paracetamol every 6 hours as needed.'}]},
+  {id:'p2',name:'Carlo Dela Peña',age:7,phone:'0918 555 0188',notes:[]},
+  {id:'p3',name:'Rodel Bautista',age:58,phone:'0920 555 0144',notes:[{date:addDays(-45),did:'d3',text:'Blood pressure 150/95. Started monitoring. Follow-up in 4 weeks.'}]}],
+ appts:[{id:'a1',pid:'p1',did:'d1',date:today(),time:'09:00',reason:'Follow-up check',status:'Scheduled'},
+  {id:'a2',pid:'p2',did:'d2',date:today(),time:'10:30',reason:'Vaccination',status:'Scheduled'},
+  {id:'a3',pid:'p3',did:'d3',date:addDays(2),time:'14:00',reason:'Blood pressure review',status:'Scheduled'}]}}
+let S;try{S=JSON.parse(localStorage.getItem('clinic-v1'))}catch(e){}
+if(!S||!S.appts)S=seed();
+if(!S.doctors.some(d=>d.id==='d4'))S.doctors.push({id:'d4',name:'Midwife Rosa Villanueva',spec:'Maternal and Newborn Care',kind:'Midwife',days:[1,2,3,4,5]});
+S.don=S.don||[];S.wd=S.wd||[];S.wpw=S.wpw||{};S.pay=S.pay||{GCash:{name:'Clinic One',num:'0900 000 0000'},Maya:{name:'Clinic One',num:'0900 000 0001'},'Online banking':{bank:'Sample Bank',name:'Clinic One',num:'0000 0000 0000'}};
+const save=()=>{try{localStorage.setItem('clinic-v1',JSON.stringify(S))}catch(e){}};
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+const P=id=>S.patients.find(x=>x.id===id)||{name:'Unknown'};
+const D=id=>S.doctors.find(x=>x.id===id)||{name:'Unknown'};
+const taken=(did,date,time,skip)=>S.appts.some(a=>a.did===did&&a.date===date&&a.time===time&&a.status!=='Cancelled'&&a.id!==skip);
+
+let tab='dash',draft={did:'d1',date:addDays(1),time:'',pid:S.patients[0]?.id||'new'},msg='',filter='All',selP=null,q='';
+const TABS=[['dash','Dashboard'],['book','Book appointment'],['appts','Appointments'],['pts','Patients and records'],['docs','Doctors and midwives'],['duty','Doctors on duty'],['mine','My appointments'],['team','Manage team'],['donate','Donate'],['don','Donations']];
+function nav(){$('#nav').innerHTML=TABS.filter(([k])=>role()==='patient'?['duty','book','mine','donate'].includes(k):k!=='mine'&&k!=='donate'&&(k!=='team'&&k!=='don'||role()==='staff')&&!(role()==='doctor'&&k==='book')).map(([k,l])=>`<button data-t="${k}" aria-current="${tab===k}">${l}</button>`).join('')}
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;msg='';render()}};
+$('#theme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark'};
+
+function apptRow(a,actions){return`<div class="row"><span class="time">${a.status==='Pending'?'Pending':fmt(a.time)}</span><div class="grow"><b>${esc(P(a.pid).name)}</b><div class="sub">${a.did?esc(D(a.did).name):'No doctor assigned yet'} · ${esc(a.reason||'No reason given')}${actions&&a.date?' · '+fdate(a.date):''}</div></div><span class="tag ${a.status}">${a.status}</span>${actions&&a.status==='Scheduled'?`<span><button class="g" data-act="done" data-id="${a.id}">Mark completed</button> <button class="g d" data-act="cancel" data-id="${a.id}">Cancel</button></span>`:''}${actions&&a.status==='Pending'&&role()==='staff'?`<span><button class="g" data-arr="${a.id}">Arrange date and time</button> <button class="g d" data-act="cancel" data-id="${a.id}">Decline</button></span>`:''}</div>`}
+
+function dash(){const t=today();const td=S.appts.filter(a=>a.date===t&&a.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
+ const up=S.appts.filter(a=>a.date>t&&a.status==='Scheduled').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,5);
+ return`<h2>Today, ${fdate(t)}</h2><div class="stats"><div class="stat"><b>${td.length}</b><span>Appointments today</span></div><div class="stat"><b>${S.appts.filter(a=>a.date>t&&a.status==='Scheduled').length}</b><span>Upcoming</span></div><div class="stat"><b>${S.patients.length}</b><span>Registered patients</span></div><div class="stat"><b>${S.doctors.filter(d=>d.days.includes(new Date(t+'T00:00').getDay())).length}</b><span>Doctors on duty</span></div></div>
+ <div class="panel"><h3>Today's schedule</h3>${td.map(a=>apptRow(a)).join('')||'<p class="sub">No appointments today. Use Book appointment to add one.</p>'}</div>
+ ${role()==='staff'?pendingPanel():''}<div class="panel"><h3>Next up</h3>${up.map(a=>apptRow(a,1)).join('')||'<p class="sub">Nothing scheduled ahead.</p>'}</div>`}
+
+function book(){if(role()==='patient')return reqView();const dow=new Date(draft.date+'T00:00').getDay(),doc=D(draft.did),works=doc.days&&doc.days.includes(dow);
+ return`<h2>Book an appointment</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="panel">
+ <div class="grid"><div><label for="bp">Patient</label><select id="bp">${S.patients.map(p=>`<option value="${p.id}" ${draft.pid===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}<option value="new" ${draft.pid==='new'?'selected':''}>New patient…</option></select></div>
+ <div><label for="bd">Doctor</label><select id="bd">${S.doctors.map(d=>`<option value="${d.id}" ${draft.did===d.id?'selected':''}>${esc(d.name)} (${esc(d.spec)})</option>`).join('')}</select></div>
+ <div><label for="bdt">Date</label><input type="date" id="bdt" min="${today()}" value="${draft.date}"></div></div>
+ ${draft.pid==='new'?`<div class="grid"><div><label for="nn">Full name</label><input id="nn" autocomplete="name"></div><div><label for="na">Age</label><input id="na" type="number" min="0" max="120"></div><div><label for="np">Phone</label><input id="np" type="tel"></div></div>`:''}
+ <label>Time</label>${works?`<div class="slots">${SLOTS.map(pad).map(t=>`<button type="button" class="slot" data-slot="${t}" aria-pressed="${draft.time===t}" ${taken(draft.did,draft.date,t)?'disabled':''}>${fmt(t)}</button>`).join('')}</div>`:`<p class="err">${esc(doc.name)} does not see patients on ${DAYS[dow]}. Pick another date or doctor.</p>`}
+ <label for="br">Reason for visit</label><input id="br" placeholder="e.g. Cough and fever for 3 days">
+ <p><button class="b" id="bsave">Confirm appointment</button></p><p class="sub">Struck-through times are already taken.</p></div>`}
+
+function appts(){const list=S.appts.filter(a=>filter==='All'||a.status===filter).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+ return`<h2>Appointments</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="tabs2">${['All','Pending','Scheduled','Completed','Cancelled'].map(f=>`<button class="g" data-f="${f}" aria-pressed="${filter===f}">${f}</button>`).join('')}</div><div class="panel">${list.map(a=>apptRow(a,1)).join('')||'<p class="sub">No appointments match this filter.</p>'}</div>`}
+
+function pts(){const list=S.patients.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));const p=S.patients.find(x=>x.id===selP);
+ return`<h2>Patients and records</h2><div class="cols"><div><div class="panel"><label for="sq">Search patients</label><input id="sq" value="${esc(q)}" placeholder="Type a name">
+ ${list.map(x=>`<div class="row"><div class="grow"><b>${esc(x.name)}</b><div class="sub">${x.age} yrs · ${esc(x.phone)}</div></div><button class="g" data-p="${x.id}">Open record</button></div>`).join('')||'<p class="sub">No patient found.</p>'}</div>
+ <div class="panel"><h3>Register new patient</h3><label for="rn">Full name</label><input id="rn"><label for="ra">Age</label><input id="ra" type="number" min="0" max="120"><label for="rp">Phone</label><input id="rp" type="tel"><p><button class="b" id="radd">Add patient</button></p></div></div>
+ <div class="panel rec">${p?`<div class="printonly"><b>Clinic One</b>: Patient record</div><button class="g noprint" id="pr" style="float:right">Print record</button><h3>${esc(p.name)}</h3><div class="sub">${p.age} yrs${p.gender?' · '+esc(p.gender):''} · ${esc(p.phone)}</div><h3 style="margin-top:16px">Visit notes</h3>${p.notes.slice().reverse().map(n=>`<div class="note"><div class="sub">${fdate(n.date)} · ${esc(D(n.did).name)}</div>${esc(n.text)}</div>`).join('')||'<p class="sub">No notes yet.</p>'}
+ <label for="nd">Add note from</label><select id="nd">${S.doctors.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('')}</select><label for="nt">Diagnosis and treatment</label><textarea id="nt" rows="3"></textarea><p><button class="b" id="nadd">Save note</button></p>`:'<p class="sub">Select a patient to see their record.</p>'}</div></div>`}
+
+function docs(){return`<h2>Doctors and schedules</h2>${S.doctors.map(d=>`<div class="panel"><h3>${esc(d.name)}</h3><div class="sub">${esc(d.kind||'Doctor')} · ${esc(d.spec)} · 9:00 AM to 5:00 PM, closed 12:00 to 1:00 PM</div><div class="sched">${DAYS.map((n,i)=>`<span class="${d.days.includes(i)?'':'off'}">${n}</span>`).join('')}</div><p class="sub">Booked in the next 7 days: ${S.appts.filter(a=>a.did===d.id&&a.status==='Scheduled'&&a.date>=today()&&a.date<=addDays(7)).length}</p></div>`).join('')}`}
+
+function applyBg(){const g='color-mix(in srgb,var(--bg) 78%,transparent)';document.body.style.backgroundImage=S.bg?'linear-gradient('+g+','+g+'),url("'+S.bg+'")':'';document.body.classList.toggle('hasbg',!!S.bg)}
+function render(){applyBg();const L=!user;$('#out').hidden=L;$('#who').textContent=L?'':user.name+' ('+(user.role==='doctor'&&user.did&&D(user.did).kind==='Midwife'?'midwife':user.role)+')';
+ if(L){$('#nav').innerHTML='';$('#view').innerHTML='<div>'+dutyView(true)+loginView()+'</div>';return}
+ if(role()==='doctor'&&tab==='book')tab='dash';if(role()==='patient'&&!['duty','book','mine','donate'].includes(tab))tab='duty';if(role()!=='patient'&&tab==='mine')tab='dash';if((tab==='team'||tab==='don')&&role()!=='staff')tab='dash';if(tab==='donate'&&role()!=='patient')tab='dash';
+ nav();$('#view').innerHTML='<div>'+({dash,book,appts,pts,docs,duty:dutyView,mine,arr:arrView,team:teamView,donate:donateView,don:donView}[tab])()+'</div>';
+ if(role()==='patient'){$('#bp')?.closest('div')?.remove()}
+ if(role()==='doctor'){$('#radd')?.closest('.panel')?.remove()}
+ if(role()==='staff'){['label[for=nd]','#nd','label[for=nt]','#nt'].forEach(s=>$(s)?.remove());$('#nadd')?.closest('p')?.remove()}
+ else if(user.did&&$('#nd'))$('#nd').value=user.did}
+const ACC=[{u:'staff',p:'staff123',role:'staff',name:'Front desk'},{u:'drsantos',p:'doctor123',role:'doctor',name:'Dr. Maria Santos',did:'d1'},{u:'midwife',p:'midwife123',role:'doctor',name:'Midwife Rosa Villanueva',did:'d4'}];
+let user=null;try{user=JSON.parse(sessionStorage.getItem('clinic-user'))}catch(e){}
+const role=()=>user&&user.role;
+function loginView(){if(authMode==='register')return regView();return`<div class="panel" style="max-width:380px;margin:30px auto"><h2>Log in</h2>${msg?`<div class="msg err" role="alert">${msg}</div>`:''}<form id="lf"><label for="lu">Username</label><input id="lu" autocomplete="username"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password"><p><button class="b" type="submit">Log in</button></p></form><p class="sub">Demo accounts: staff / staff123 (front desk), drsantos / doctor123 (doctor) and midwife / midwife123 (midwife).</p><p><button class="g" id="toReg" type="button">Create a patient account</button></p></div>`}
+const getAcc=()=>{try{return JSON.parse(localStorage.getItem('clinic-acc'))||[]}catch(e){return[]}};
+let authMode='login';
+function regView(){return`<div class="panel" style="max-width:380px;margin:30px auto"><h2>Create a patient account</h2>${msg?`<div class="msg err" role="alert">${msg}</div>`:''}<form id="rf"><label for="rn2">Full name</label><input id="rn2" autocomplete="name"><label for="ru">Username</label><input id="ru" autocomplete="username"><label for="rp1">Password (at least 6 characters)</label><input id="rp1" type="password" autocomplete="new-password"><label for="rp2">Confirm password</label><input id="rp2" type="password" autocomplete="new-password"><p><button class="b" type="submit">Create account</button> <button class="g" id="toLogin" type="button">I have an account</button></p></form></div>`}
+function dutyView(pub){const t=today(),dow=n=>new Date(n+'T00:00').getDay(),on=S.doctors.filter(d=>d.days.includes(dow(t)));
+ const week=[0,1,2,3,4,5,6].map(i=>{const dt=addDays(i);return{dt,ds:S.doctors.filter(d=>d.days.includes(dow(dt)))}});const next=week.slice(1).find(w=>w.ds.length);
+ return`<div class="panel ${on.length?'duty':'closed'}"><h2>${pub?'Clinic status today':'Doctors on duty today'}</h2><p class="sub">${fdate(t)} · Clinic hours 9:00 AM to 5:00 PM, closed 12:00 to 1:00 PM</p>${on.length?on.map(d=>`<div class="row"><div class="grow"><b>${esc(d.name)}</b><div class="sub">${esc(d.kind||'Doctor')} · ${esc(d.spec)}</div></div><span class="tag Completed">On duty</span></div>`).join(''):`<p><b class="err">No doctors or midwives on duty today. Please do not come to the clinic.</b></p>${next?`<p>Next doctor on duty: ${esc(next.ds.map(d=>d.name).join(', '))} on ${fdate(next.dt)}.</p>`:''}`}<h3 style="margin-top:14px">Next 7 days</h3>${week.map(w=>`<div class="row"><span class="time" style="min-width:150px">${fdate(w.dt).replace(/, \d{4}$/,'')}</span><div class="grow sub">${w.ds.length?esc(w.ds.map(d=>d.name).join(', ')):'No doctors on duty'}</div></div>`).join('')}</div>${pub?'<p class="sub">To book an appointment, create a patient account or log in.</p>':''}`}
+const autoSlot=()=>{const n=new Date(),hm=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');for(let i=0;i<30;i++){const dt=addDays(i),w=new Date(dt+'T00:00').getDay();for(const t of SLOTS.map(pad)){if(i===0&&t<=hm)continue;const d=S.doctors.find(x=>x.days.includes(w)&&!taken(x.id,dt,t));if(d)return{did:d.id,date:dt,time:t}}}return null};
+function pbook(){const nx=autoSlot();return`<h2>Book an appointment</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="panel"><form id="pf"><label for="pn">Patient name</label><input id="pn" value="${esc(user.name)}" autocomplete="name"><label for="pr">Reason for visit</label><input id="pr" placeholder="e.g. Cough and fever for 3 days">${nx?`<p class="sub" style="margin-top:14px">Your appointment is set automatically to the earliest time a doctor is on duty: <b>${fdate(nx.date)} at ${fmt(nx.time)}</b> with ${esc(D(nx.did).name)}. The clinic staff will confirm it.</p><p><button class="b" type="submit">Request appointment</button></p>`:'<p class="err">No open times in the next 30 days. Please call the clinic.</p>'}</form></div>`}
+const pendingPanel=()=>{const l=S.appts.filter(a=>a.status==='Pending').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));return`<div class="panel closed"><h3>Waiting for confirmation (${l.length})</h3>${l.map(a=>apptRow(a,true)).join('')||'<p class="sub">No patient requests waiting.</p>'}</div>`};
+$('#view').addEventListener('submit',e=>{if(e.target.id!=='pf')return;e.preventDefault();const nm=$('#pn').value.trim(),rs=$('#pr').value.trim();
+ if(!nm||!rs){msg='<span class="err">Enter your name and the reason for your visit.</span>';render();return}
+ const s=autoSlot();if(!s){msg='<span class="err">No open times right now. Please call the clinic.</span>';render();return}
+ const pid=myPid();P(pid).name=nm;S.appts.push({id:uid('a'),pid,did:s.did,date:s.date,time:s.time,reason:rs,status:'Pending'});save();
+ msg=`Request sent for ${fdate(s.date)} at ${fmt(s.time)} with ${esc(D(s.did).name)}. Wait for the clinic staff to confirm it. Check My appointments for the status.`;render()});
+function teamView(){const accs=[...ACC,...getAcc()].filter(x=>x.role!=='patient');
+ return`<h2>Manage team</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="panel"><h3>Portal background</h3><p class="sub">Upload a picture to use as the background of the whole portal. Patients, doctors, midwives and visitors will all see it.</p>${S.bg?`<img class="bgprev" src="${S.bg}" alt="Current portal background preview">`:''}<label for="bgfile">Choose image (JPG, PNG or WebP)</label><input id="bgfile" type="file" accept="image/*">${S.bg?'<p><button class="g d" id="bgrm">Remove background</button></p>':''}</div><div class="panel"><h3>Add a staff member, doctor or midwife</h3><p class="sub">Only staff can create these accounts. Patients create their own accounts on the login page.</p><div class="grid"><div><label for="tn">Full name</label><input id="tn"></div><div><label for="tr">Role</label><select id="tr"><option value="staff">Front desk staff</option><option>Doctor</option><option>Midwife</option></select></div><div><label for="ts">Specialty (doctors and midwives)</label><input id="ts"></div><div><label for="tu">Username</label><input id="tu" autocomplete="off"></div><div><label for="tp">Password (at least 6 characters)</label><input id="tp" type="password" autocomplete="new-password"></div></div><label>Working days (doctors and midwives)</label><div class="sched">${DAYS.map((n,i)=>`<label style="display:inline-flex;gap:4px;margin:0"><input type="checkbox" id="td${i}" style="width:auto" ${i>0&&i<6?'checked':''}>${n}</label>`).join('')}</div><p><button class="b" id="tadd">Add to team</button></p></div><div class="panel"><h3>Doctors and midwives</h3>${S.doctors.map(d=>`<div class="row"><div class="grow"><b>${esc(d.name)}</b><div class="sub">${esc(d.kind||'Doctor')} · ${esc(d.spec)}</div></div><div class="sched">${DAYS.map((n,i)=>`<span class="${d.days.includes(i)?'':'off'}">${n}</span>`).join('')}</div></div>`).join('')}</div><div class="panel"><h3>Login accounts</h3>${accs.map(x=>`<div class="row"><div class="grow"><b>${esc(x.name)}</b><div class="sub">${esc(x.u)}</div></div><span class="tag">${x.role==='staff'?'Front desk':(x.did&&D(x.did).kind==='Midwife'?'Midwife':'Doctor')}</span></div>`).join('')}</div>`}
+const peso=n=>'₱'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+let dn=null;const METHODS=['GCash','Maya','Online banking'];
+function acctLine(m){const a=S.pay[m]||{};return`<div class="note"><b>${esc(m)}</b>${m==='Online banking'&&a.bank?' · '+esc(a.bank):''}<div class="sub">Account name: ${esc(a.name||'Not set')}</div><div class="sub">${m==='Online banking'?'Account number':'Number'}: ${esc(a.num||'Not set')}</div></div>`}
+function donateView(){const z=dn||{m:'GCash',a:'',r:'',d:''},mine=S.don.filter(x=>x.u===user.u).slice().reverse();
+ return`<h2>Donate to the clinic</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="panel"><p class="sub">Donations are optional and help the clinic serve its patients. Send your donation from your GCash, Maya or online banking app to the clinic account below, then enter the amount and the reference number from your receipt. Clinic staff will check it and add it to the clinic balance.</p><label for="dm">Payment method</label><select id="dm">${METHODS.map(m=>`<option ${z.m===m?'selected':''}>${m}</option>`).join('')}</select>${acctLine(z.m)}<div class="grid"><div><label for="da">Amount (PHP)</label><input id="da" type="number" min="1" step="0.01" value="${esc(z.a)}"></div><div><label for="dr">Reference number</label><input id="dr" value="${esc(z.r)}" autocomplete="off"></div></div><label for="dd">Description (optional)</label><input id="dd" maxlength="140" value="${esc(z.d)}" placeholder="e.g. For the clinic medicine fund"><p><button class="b" id="dsend">Submit donation</button></p></div><div class="panel"><h3>My donations</h3>${mine.map(x=>`<div class="row"><span class="time" style="min-width:90px">${peso(x.amount)}</span><div class="grow"><b>${esc(x.m)}</b><div class="sub">${fdate(x.date)} · Ref ${esc(x.ref)}${x.note?' · '+esc(x.note):''}</div></div><span class="tag ${x.status}">${x.status}</span></div>`).join('')||'<p class="sub">No donations yet.</p>'}</div>`}
+function donView(){const rc=S.don.filter(x=>x.status==='Received'),pend=S.don.filter(x=>x.status==='Pending'),sum=l=>l.reduce((s,x)=>s+x.amount,0),p=S.pay,row=x=>`<div class="row"><span class="time" style="min-width:90px">${peso(x.amount)}</span><div class="grow"><b>${esc(x.name)}</b><div class="sub">${esc(x.m)} · ${fdate(x.date)} · Ref ${esc(x.ref)}${x.note?' · '+esc(x.note):''}</div></div>`;
+ return`<h2>Donations</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="stats"><div class="stat"><b>${peso(sum(rc)-S.wd.reduce((s,x)=>s+x.amount,0))}</b><span>Available balance</span></div><div class="stat"><b>${peso(S.wd.reduce((s,x)=>s+x.amount,0))}</b><span>Total withdrawn</span></div><div class="stat"><b>${pend.length}</b><span>Waiting to be checked (${peso(sum(pend))})</span></div><div class="stat"><b>${rc.length}</b><span>Donations received</span></div></div><div class="panel"><h3>Waiting to be checked</h3><p class="sub">Compare the amount and reference number with your GCash, Maya or bank records before marking a donation as received.</p>${pend.map(x=>row(x)+`<span><button class="g" data-dact="ok" data-did="${x.id}">Mark received</button> <button class="g d" data-dact="no" data-did="${x.id}">Reject</button></span></div>`).join('')||'<p class="sub">Nothing waiting.</p>'}</div><div class="panel"><h3>Receiving accounts shown to patients</h3><p class="sub">Replace the sample numbers with the clinic's real accounts.</p><div class="grid"><div><label for="g1">GCash account name</label><input id="g1" value="${esc(p.GCash.name)}"></div><div><label for="g2">GCash number</label><input id="g2" value="${esc(p.GCash.num)}"></div><div><label for="m1">Maya account name</label><input id="m1" value="${esc(p.Maya.name)}"></div><div><label for="m2">Maya number</label><input id="m2" value="${esc(p.Maya.num)}"></div><div><label for="b0">Bank name</label><input id="b0" value="${esc(p['Online banking'].bank)}"></div><div><label for="b1">Bank account name</label><input id="b1" value="${esc(p['Online banking'].name)}"></div><div><label for="b2">Bank account number</label><input id="b2" value="${esc(p['Online banking'].num)}"></div></div><p><button class="b" id="paysave">Save accounts</button></p></div><div class="panel"><h3>History</h3>${S.don.filter(x=>x.status!=='Pending').slice().reverse().map(x=>row(x)+`<span class="tag ${x.status}">${x.status}</span></div>`).join('')||'<p class="sub">No history yet.</p>'}</div>${wdView()}`}
+let wf=null;const BANKS=['BDO','PBI','MetroBank','LandBank'];
+const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('clinic-salt:'+t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+const avail=()=>S.don.filter(x=>x.status==='Received').reduce((s,x)=>s+x.amount,0)-S.wd.reduce((s,x)=>s+x.amount,0);
+function wdView(){const hist=`<h3 style="margin-top:18px">Withdrawal history</h3>${S.wd.slice().reverse().map(x=>`<div class="row"><span class="time" style="min-width:90px">${peso(x.amount)}</span><div class="grow"><b>${esc(x.to)}</b> <span class="sub">${x.kind==='wallet'?'Online wallet':'Bank transfer'}</span><div class="sub">${esc(x.name)} · ${'••••'+esc(x.num.slice(-4))} · ${fdate(x.date)} · by ${esc(x.by)}</div></div></div>`).join('')||'<p class="sub">No withdrawals yet.</p>'}`;
+ if(!S.wpw[user.u])return`<div class="panel"><h3>Withdraw donations</h3><p class="sub">Create a withdrawal password first. You will need it for every withdrawal.</p><div class="grid"><div><label for="wp1">Withdrawal password (at least 6 characters)</label><input id="wp1" type="password" autocomplete="new-password"></div><div><label for="wp2">Confirm password</label><input id="wp2" type="password" autocomplete="new-password"></div></div><p><button class="b" id="wpset">Create withdrawal password</button></p>${hist}</div>`;
+ const z=wf||{t:'wallet',m:'GCash',a:'',n:'',num:''},isW=z.t==='wallet';if(!isW&&!BANKS.includes(z.m))z.m='BDO';if(isW&&!['GCash','Maya'].includes(z.m))z.m='GCash';
+ return`<div class="panel"><h3>Withdraw donations</h3><p class="sub">Available balance: <b>${peso(avail())}</b>. This records the withdrawal and lowers the balance. You must send the money from the clinic's own account.</p><div class="grid"><div><label for="wt">Withdraw by</label><select id="wt"><option value="wallet" ${isW?'selected':''}>Online wallet</option><option value="bank" ${isW?'':'selected'}>Bank transfer</option></select></div><div><label for="${isW?'wm':'wb'}">${isW?'Wallet':'Bank'}</label><select id="${isW?'wm':'wb'}">${(isW?['GCash','Maya']:BANKS).map(x=>`<option ${z.m===x?'selected':''}>${x}</option>`).join('')}</select></div><div><label for="wa">Amount (PHP)</label><input id="wa" type="number" min="1" step="0.01" value="${esc(z.a)}"></div><div><label for="wn">${isW?z.m+' name':'Account name'}</label><input id="wn" value="${esc(z.n)}"></div><div><label for="wnum">${isW?z.m+' number':'Bank account number'}</label><input id="wnum" inputmode="numeric" value="${esc(z.num)}"></div><div><label for="wp">Withdrawal password</label><input id="wp" type="password" autocomplete="off"></div></div><p><button class="b" id="wsend">Withdraw</button></p>${hist}</div>`}
+$('#view').addEventListener('change',e=>{if(e.target.id!=='bgfile'||role()!=='staff')return;const f=e.target.files[0];if(!f)return;
+ if(!f.type.startsWith('image/')){msg='<span class="err">Choose an image file (JPG, PNG or WebP).</span>';render();return}
+ if(f.size>10*1024*1024){msg='<span class="err">That image is too large. Choose one under 10 MB.</span>';render();return}
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  const url=c.toDataURL('image/jpeg',.8),old=S.bg;S.bg=url;try{localStorage.setItem('clinic-v1',JSON.stringify(S));msg='Background updated. Everyone who opens the portal will see it.'}catch(err){S.bg=old;msg='<span class="err">The image could not be saved. Try a smaller image.</span>'}render()};
+  im.onerror=()=>{msg='<span class="err">That file could not be read as an image.</span>';render()};im.src=r.result};r.readAsDataURL(f)});
+$('#view').addEventListener('change',e=>{if(['wt','wm','wb'].includes(e.target.id)){const tv=$('#wt').value,m=($('#wm')||$('#wb')).value;wf={t:tv,m:e.target.id==='wt'?(tv==='wallet'?'GCash':'BDO'):m,a:$('#wa').value,n:$('#wn').value,num:$('#wnum').value};render()}});
+$('#view').addEventListener('change',e=>{if(e.target.id==='dm'){dn={m:e.target.value,a:$('#da').value,r:$('#dr').value,d:$('#dd').value};render()}});
+let rq=null,arr=null;
+const onDuty=dt=>S.doctors.filter(d=>d.days.includes(new Date(dt+'T00:00').getDay()));
+function reqView(){const z=rq||{n:user.name,a:'',g:'',r:''};return`<h2>Book an appointment</h2>${msg?`<div class="msg err" role="alert">${msg}</div>`:''}<div class="panel"><p class="sub">Tell us about yourself and why you are visiting. Clinic staff will confirm your appointment and choose the date and time based on the doctors on duty.</p><div class="grid"><div><label for="qn">Patient name</label><input id="qn" value="${esc(z.n)}" autocomplete="name"></div><div><label for="qa">Age</label><input id="qa" type="number" min="0" max="120" value="${esc(z.a)}"></div><div><label for="qg">Gender</label><select id="qg">${['','Female','Male','Other'].map(x=>`<option value="${x}" ${z.g===x?'selected':''}>${x||'Select…'}</option>`).join('')}</select></div></div><label for="qr">Reason for visit</label><textarea id="qr" rows="3">${esc(z.r)}</textarea><p><button class="b" id="rsend">Send request</button></p></div>`}
+function arrView(){const a=S.appts.find(x=>arr&&x.id===arr.id&&x.status==='Pending');if(!a)return'<h2>Arrange appointment</h2><p class="sub">That request was already handled.</p>';
+ const p=P(a.pid),ds=onDuty(arr.date);if(!ds.some(d=>d.id===arr.did))arr.did=ds[0]?ds[0].id:'';
+ return`<h2>Arrange appointment</h2>${msg?`<div class="msg err" role="alert">${msg}</div>`:''}<div class="panel"><h3>${esc(p.name)}</h3><div class="sub">${p.age||'Age not given'} yrs · ${esc(p.gender||'Gender not given')}</div><p>Reason for visit: ${esc(a.reason||'Not given')}</p></div><div class="panel"><div class="grid"><div><label for="ad">Date</label><input type="date" id="ad" min="${today()}" value="${arr.date}"></div><div><label for="adoc">Doctor on duty</label>${ds.length?`<select id="adoc">${ds.map(d=>`<option value="${d.id}" ${d.id===arr.did?'selected':''}>${esc(d.name)} (${esc(d.spec)})</option>`).join('')}</select>`:'<p class="err">No doctors on duty on this day. Choose another date.</p>'}</div></div>${ds.length?`<label>Time</label><div class="slots">${SLOTS.map(pad).map(t=>`<button type="button" class="slot" data-aslot="${t}" aria-pressed="${arr.slot===t}" ${taken(arr.did,arr.date,t)?'disabled':''}>${fmt(t)}</button>`).join('')}</div>`:''}<p><button class="b" id="aok">Confirm appointment</button> <button class="g d" id="ano">Decline request</button></p></div>`}
+const myPid=()=>{let p=S.patients.find(x=>x.acc===user.u);if(!p){p={id:uid('p'),name:user.name,age:0,phone:'',notes:[],acc:user.u};S.patients.push(p);save()}return p.id};
+function mine(){const p=S.patients.find(x=>x.acc===user.u),l=p?S.appts.filter(a=>a.pid===p.id).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)):[];
+ return`<h2>My appointments</h2>${msg?`<div class="msg" role="status">${msg}</div>`:''}<div class="panel">${l.map(a=>`<div class="row"><span class="time">${a.status==='Pending'?'Pending':fmt(a.time)}</span><div class="grow"><b>${a.did?esc(D(a.did).name):'Waiting for staff to confirm'}</b><div class="sub">${a.did?fdate(a.date)+' · ':'Staff will choose your date and time · '}${esc(a.reason||'No reason given')}</div></div><span class="tag ${a.status}">${a.status}</span>${a.status==='Scheduled'||a.status==='Pending'?`<button class="g d" data-act="cancel" data-id="${a.id}">Cancel</button>`:''}</div>`).join('')||'<p class="sub">You have no appointments yet. Use Book appointment to make one.</p>'}</div>`}
+const v=$('#view');
+v.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.arr){arr={id:t.dataset.arr,date:addDays(1),did:'',slot:''};tab='arr';msg='';render()}
+ else if(t.dataset.aslot){arr.slot=t.dataset.aslot;render()}
+ else if(t.id==='aok'){if(!arr.did||!arr.slot){msg='Choose a doctor on duty and a time slot.';render();return}
+  if(taken(arr.did,arr.date,arr.slot)){msg='That slot was just taken. Choose another time.';arr.slot='';render();return}
+  const a=S.appts.find(x=>x.id===arr.id);Object.assign(a,{did:arr.did,date:arr.date,time:arr.slot,status:'Scheduled'});save();
+  msg='Confirmed: '+esc(P(a.pid).name)+' with '+esc(D(a.did).name)+' on '+fdate(a.date)+' at '+fmt(a.time)+'.';tab='appts';render()}
+ else if(t.id==='ano'){const a=S.appts.find(x=>x.id===arr.id);a.status='Cancelled';save();msg='Request declined.';tab='appts';render()}
+ else if(t.id==='bgrm'){delete S.bg;save();msg='Background removed.';render()}
+ else if(t.id==='wpset'){const a=$('#wp1').value,b=$('#wp2').value;msg=a.length<6?'<span class="err">The withdrawal password must have at least 6 characters.</span>':a!==b?'<span class="err">The passwords do not match.</span>':'';
+  if(msg){render();return}
+  sha(a).then(h=>{S.wpw[user.u]=h;save();msg='Withdrawal password created. You can now make withdrawals.';render()})}
+ else if(t.id==='wsend'){const f={t:$('#wt').value,m:($('#wm')||$('#wb')).value,a:$('#wa').value,n:$('#wn').value.trim(),num:$('#wnum').value.trim()},pw=$('#wp').value;wf=f;
+  const amt=+f.a,digits=f.num.replace(/[\s-]/g,''),isW=f.t==='wallet';
+  const bad=!(amt>0)?'Enter the amount to withdraw.':amt>avail()?'The amount is more than the available balance ('+peso(avail())+').':!f.n?(isW?'Enter the '+f.m+' name.':'Enter the account name.'):isW&&!/^09\d{9}$/.test(digits)?'Enter a valid '+f.m+' number (11 digits, starting with 09).':!isW&&!/^\d{8,20}$/.test(digits)?'Enter a valid bank account number (8 to 20 digits).':!pw?'Enter your withdrawal password.':'';
+  if(bad){msg='<span class="err">'+bad+'</span>';render();return}
+  sha(pw).then(h=>{if(h!==S.wpw[user.u]){msg='<span class="err">Wrong withdrawal password.</span>';render();return}
+   S.wd.push({id:uid('w'),by:user.name,kind:f.t,to:f.m,name:f.n,num:digits,amount:amt,date:today()});save();wf=null;
+   msg='Withdrawal of '+peso(amt)+' to '+esc(f.m)+' recorded. Send the money from the clinic account yourself. This system keeps the record and the balance.';render()})}
+ else if(t.dataset.dact){const x=S.don.find(y=>y.id===t.dataset.did);if(x&&x.status==='Pending'){x.status=t.dataset.dact==='ok'?'Received':'Rejected';save();msg=x.status==='Received'?peso(x.amount)+' added to the clinic balance.':'Donation rejected.'}render()}
+ else if(t.id==='paysave'){S.pay={GCash:{name:$('#g1').value.trim(),num:$('#g2').value.trim()},Maya:{name:$('#m1').value.trim(),num:$('#m2').value.trim()},'Online banking':{bank:$('#b0').value.trim(),name:$('#b1').value.trim(),num:$('#b2').value.trim()}};save();msg='Receiving accounts saved.';render()}
+ else if(t.id==='dsend'){const m=$('#dm').value,a=+$('#da').value,r=$('#dr').value.trim(),d=$('#dd').value.trim();
+  if(!(a>0)||a>1000000||r.length<4){dn={m,a:$('#da').value,r,d};msg='<span class="err">Enter an amount and the reference number from your receipt.</span>';render();return}
+  S.don.push({id:uid('n'),u:user.u,name:user.name,m,amount:a,ref:r,note:d,date:today(),status:'Pending'});save();dn=null;msg='Thank you! Your donation was sent to the clinic staff to check. It shows as Received once they confirm it.';render()}
+ else if(t.id==='tadd'){const n=$('#tn').value.trim(),r=$('#tr').value,u=$('#tu').value.trim(),pw=$('#tp').value,sp=$('#ts').value.trim(),days=[0,1,2,3,4,5,6].filter(i=>$('#td'+i).checked);
+  const bad=!n||!u?'Enter a name and a username.':pw.length<6?'Password must have at least 6 characters.':[...ACC,...getAcc()].some(x=>x.u.toLowerCase()===u.toLowerCase())?'That username is taken.':r!=='staff'&&!days.length?'Choose at least one working day.':'';
+  if(bad){msg=bad;render();return}
+  const acc=getAcc(),a={u,p:pw,role:r==='staff'?'staff':'doctor',name:n};
+  if(r!=='staff'){const d={id:uid('d'),name:n,spec:sp||(r==='Midwife'?'Maternal and Newborn Care':'General Medicine'),days,kind:r};S.doctors.push(d);a.did=d.id}
+  acc.push(a);try{localStorage.setItem('clinic-acc',JSON.stringify(acc))}catch(err){}save();msg='Added '+esc(n)+' ('+(r==='staff'?'front desk staff':r.toLowerCase())+'). They can now log in as '+esc(u)+'.';render()}
+ else if(t.id==='rsend'){const n=$('#qn').value.trim(),av=$('#qa').value,g=$('#qg').value,r=$('#qr').value.trim();
+  if(!n||av===''||+av<0||+av>120||!g||!r){rq={n,a:av,g,r};msg='Please fill in your name, age, gender and reason for visit.';render();return}
+  const p=S.patients.find(x=>x.id===myPid());Object.assign(p,{name:n,age:+av,gender:g});
+  S.appts.push({id:uid('a'),pid:p.id,did:null,date:'',time:'',reason:r,status:'Pending'});save();rq=null;
+  msg='Request sent. Clinic staff will confirm your appointment and choose the date and time based on the doctors on duty.';tab='mine';render()}});
+v.addEventListener('change',e=>{if(!arr)return;if(e.target.id==='ad'){arr.date=e.target.value||arr.date;arr.slot='';render()}else if(e.target.id==='adoc'){arr.did=e.target.value;arr.slot='';render()}});
+v.addEventListener('click',e=>{if(e.target.id==='toReg'){authMode='register';msg='';render()}if(e.target.id==='toLogin'){authMode='login';msg='';render()}});
+v.addEventListener('submit',e=>{if(e.target.id!=='rf')return;e.preventDefault();const n=$('#rn2').value.trim(),u=$('#ru').value.trim(),p1=$('#rp1').value;
+ const bad=!n||!u?'Enter your name and a username.':p1.length<6?'Password must have at least 6 characters.':p1!==$('#rp2').value?'Passwords do not match.':[...ACC,...getAcc()].some(x=>x.u.toLowerCase()===u.toLowerCase())?'That username is taken. Choose another.':'';
+ if(bad){msg=bad;render();return}
+ const acc=getAcc(),a={u,p:p1,role:'patient',name:n};acc.push(a);try{localStorage.setItem('clinic-acc',JSON.stringify(acc))}catch(err){}
+ msg='';user={...a,p:undefined};try{sessionStorage.setItem('clinic-user',JSON.stringify(user))}catch(err){}authMode='login';tab='duty';render()});
+v.addEventListener('submit',e=>{if(e.target.id!=='lf')return;e.preventDefault();const a=[...ACC,...getAcc()].find(x=>x.u===$('#lu').value.trim()&&x.p===$('#lp').value);if(!a){msg='Wrong username or password. Check both and try again.';render();return}msg='';user={...a,p:undefined};try{sessionStorage.setItem('clinic-user',JSON.stringify(user))}catch(err){}tab='dash';render()});
+$('#out').onclick=()=>{user=null;msg='';try{sessionStorage.removeItem('clinic-user')}catch(e){}render()};
+v.addEventListener('click',e=>{if(e.target.id==='pr')window.print()});
+v.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+ if(d.slot){draft.time=d.slot;render()}
+ else if(d.f){filter=d.f;render()}
+ else if(d.p){selP=d.p;render()}
+ else if(d.act){const a=S.appts.find(x=>x.id===d.id);a.status=d.act==='done'?'Completed':d.act==='confirm'?'Scheduled':'Cancelled';save();render()}
+ else if(t.id==='bsave'){
+  let pid=draft.pid;if(role()==='patient')pid=myPid();
+  if(pid==='new'){const n=$('#nn').value.trim();if(!n){msg='<span class="err">Enter the new patient\u2019s name.</span>';render();return}
+   const p={id:uid('p'),name:n,age:+$('#na').value||0,phone:$('#np').value.trim(),notes:[]};S.patients.push(p);pid=p.id;draft.pid=pid}
+  if(!draft.time){msg='<span class="err">Choose a time slot first.</span>';render();return}
+  if(taken(draft.did,draft.date,draft.time)){msg='<span class="err">That slot was just taken. Choose another time.</span>';draft.time='';render();return}
+  S.appts.push({id:uid('a'),pid,did:draft.did,date:draft.date,time:draft.time,reason:$('#br').value.trim(),status:'Scheduled'});save();
+  msg=`Booked: ${esc(P(pid).name)} with ${esc(D(draft.did).name)} on ${fdate(draft.date)} at ${fmt(draft.time)}.`;draft.time='';render()}
+ else if(t.id==='radd'){const n=$('#rn').value.trim();if(!n)return;const p={id:uid('p'),name:n,age:+$('#ra').value||0,phone:$('#rp').value.trim(),notes:[]};S.patients.push(p);selP=p.id;save();render()}
+ else if(t.id==='nadd'){const x=$('#nt').value.trim();if(!x)return;P(selP).notes.push({date:today(),did:$('#nd').value,text:x});save();render()}
+});
+v.addEventListener('change',e=>{const i=e.target.id;
+ if(i==='bp'){draft.pid=e.target.value;render()}
+ else if(i==='bd'){draft.did=e.target.value;draft.time='';render()}
+ else if(i==='bdt'){draft.date=e.target.value||addDays(1);draft.time='';render()}});
+v.addEventListener('input',e=>{if(e.target.id==='sq'){q=e.target.value;const pos=e.target.selectionStart;render();const s=$('#sq');s.focus();s.setSelectionRange(pos,pos)}});
+render();
+</script>
+</body>
+</html>
